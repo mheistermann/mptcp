@@ -20,6 +20,8 @@
 #include <linux/types.h>
 #include <asm/byteorder.h>
 #include <linux/socket.h>
+#include <linux/in.h>
+#include <linux/in6.h>
 
 struct tcphdr {
 	__be16	source;
@@ -111,6 +113,8 @@ enum {
 #define TCP_REPAIR_OPTIONS	22
 #define TCP_FASTOPEN		23	/* Enable FastOpen on listeners */
 #define TCP_TIMESTAMP		24
+#define TCP_MULTIPATH_CONNID 50/* Get unique conn. identifier, cf. RFC6897 */
+#define TCP_MULTIPATH_SUBFLOWS 51/* Get subflow list, cf. RFC6897 */
 
 struct tcp_repair_opt {
 	__u32	opt_code;
@@ -196,6 +200,24 @@ struct tcp_md5sig {
 	__u16	tcpm_keylen;				/* key length */
 	__u32	__tcpm_pad2;				/* zero */
 	__u8	tcpm_key[TCP_MD5SIG_MAXKEYLEN];		/* key (binary) */
+};
+
+
+/* TCP_MULTIPATH_SUBFLOWS data */
+struct mptcp_subflow {
+	unsigned short family; // AF_INET or AF_INET6
+	__be16 dport;
+	__be16 sport;
+	union {
+		struct {
+			struct in_addr daddr;
+			struct in_addr saddr;
+		};
+		struct {
+			struct in6_addr daddr6;
+			struct in6_addr saddr6;
+		};
+	};
 };
 
 #endif /* _UAPI_LINUX_TCP_H */
